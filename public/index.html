@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Search — local rebuild</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔎</text></svg>" />
+<style>
+  :root{
+    --bg:#f6f8f9; --paper:#fff; --ink:#0f172a; --muted:#607084; --line:#e5e9ef;
+    --teal:#0f766e; --teal-soft:#d8f5ef; --amber:#b45309; --amber-soft:#fef3c7;
+    --shadow-lg:0 24px 60px rgba(15,23,42,.30); --mark:#0d9488;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:
+      radial-gradient(1000px 500px at 85% -10%, #d8f5ef 0%, transparent 60%),
+      radial-gradient(800px 400px at -10% 110%, #fef3c7 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font:15px/1.55 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;
+    padding:14px 24px;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line)}
+  .logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#0f766e,#14b8a6);
+    color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;
+    box-shadow:0 4px 10px rgba(15,118,110,.35)}
+  header b{font-size:15px}
+  header .spacer{flex:1}
+  kbd{font:11px Consolas,monospace;background:#f2f4f7;border:1px solid var(--line);
+    border-bottom-width:2px;border-radius:5px;padding:2px 6px;color:var(--muted)}
+  main{max-width:900px;margin:0 auto;padding:72px 24px 48px;text-align:center}
+  h1{font-size:44px;line-height:1.08;margin:0 0 12px;letter-spacing:-.025em}
+  h1 .grad{background:linear-gradient(120deg,#0f766e,#14b8a6 60%,#0ea5e9);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  p.lead{color:var(--muted);font-size:16.5px;margin:0 0 30px}
+  .opener{display:flex;align-items:center;gap:10px;width:100%;max-width:540px;margin:0 auto;
+    background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;
+    color:var(--muted);cursor:pointer;text-align:left;font:inherit;
+    transition:border-color .15s, box-shadow .15s}
+  .opener:hover{border-color:#99f6e4;box-shadow:0 10px 30px rgba(15,118,110,.12)}
+  .opener .spacer{flex:1}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:22px}
+  .chip{border:1px solid var(--line);background:var(--paper);color:var(--muted);
+    font:inherit;font-size:12.5px;padding:6px 12px;border-radius:999px;cursor:pointer;
+    transition:all .15s}
+  .chip:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-soft)}
+  .chips .label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:#98a2b3;align-self:center;margin-right:2px}
+  .stats{margin-top:26px;color:var(--muted);font-size:12.5px}
+  .stats code{font-family:Consolas,monospace;color:var(--teal)}
+  .pipeline{margin:34px auto 0;max-width:680px;text-align:left;font:12px/1.9 Consolas,monospace;
+    color:#475467;background:var(--paper);border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;white-space:pre;overflow-x:auto}
+  .pipeline b{color:var(--mark)}
+
+  /* modal */
+  .backdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;
+    align-items:flex-start;justify-content:center;padding-top:11vh;z-index:20;
+    opacity:0;transition:opacity .15s}
+  .backdrop.open{display:flex}
+  .backdrop.shown{opacity:1}
+  .dialog{width:min(640px,92vw);background:var(--paper);border-radius:18px;overflow:hidden;
+    box-shadow:var(--shadow-lg);border:1px solid var(--line);
+    transform:translateY(8px) scale(.985);transition:transform .18s ease}
+  .backdrop.shown .dialog{transform:none}
+  .search-row{display:flex;align-items:center;gap:10px;padding:15px 16px;border-bottom:1px solid var(--line)}
+  .search-row input{flex:1;border:0;outline:0;font:inherit;font-size:16px;background:transparent;color:inherit}
+  .search-row input::placeholder{color:#98a2b3}
+  .search-row .clear-q{border:0;background:transparent;color:#98a2b3;font-size:15px;cursor:pointer;
+    padding:2px 6px;border-radius:6px;display:none}
+  .search-row .clear-q:hover{background:#f2f4f7;color:var(--ink)}
+  .search-row.has-q .clear-q{display:block}
+  .tabs{display:flex;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line);background:#fcfcfd}
+  .tab{border:0;background:transparent;font:inherit;font-size:12.5px;color:var(--muted);
+    padding:6px 10px;border-radius:8px;cursor:pointer;text-transform:capitalize;transition:background .15s}
+  .tab:hover{background:#f2f4f7}
+  .tab[aria-selected="true"]{background:var(--teal-soft);color:var(--teal);font-weight:600}
+  .recent{display:none;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line);
+    background:#fcfcfd;flex-wrap:wrap;align-items:center}
+  .recent.on{display:flex}
+  .recent .rlabel{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#98a2b3}
+  .rchip{border:1px solid var(--line);background:var(--paper);font:inherit;font-size:11.5px;
+    padding:4px 10px;border-radius:999px;cursor:pointer;color:var(--muted)}
+  .rchip:hover{border-color:var(--teal);color:var(--teal)}
+  .rchip .x{color:#98a2b3;margin-left:6px}
+  .results{max-height:52vh;overflow:auto;scrollbar-width:thin}
+  .hit{display:block;padding:12px 16px;border-bottom:1px solid #f1f3f6;text-decoration:none;color:inherit;
+    transition:background .1s}
+  .hit:hover{background:#fafbfc}
+  .hit .t{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14.5px}
+  .hit mark{background:transparent;color:var(--mark);font-weight:700;border-radius:2px}
+  .badge{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;background:#f2f4f7;color:#475467}
+  .badge.premium{background:var(--amber-soft);color:var(--amber)}
+  .hit .b{color:var(--muted);font-size:13px;margin-top:3px}
+  .hit .meta{color:#98a2b3;font-size:11px;margin-top:5px;font-family:Consolas,monospace;
+    display:flex;align-items:center;gap:8px}
+  .hit .meta .path{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .hit .meta button{border:0;background:transparent;color:#98a2b3;cursor:pointer;font:inherit;
+    font-size:11px;padding:1px 6px;border-radius:6px}
+  .hit .meta button:hover{background:#eef3f7;color:var(--teal)}
+  .empty{padding:26px 16px;color:var(--muted);font-size:13.5px;text-align:center}
+  .footer{padding:9px 14px;border-top:1px solid var(--line);color:#98a2b3;font-size:11px;
+    display:flex;gap:14px;background:#fcfcfd}
+  .footer .spacer{flex:1}
+  .debug{padding:8px 16px;color:#98a2b3;font:11px Consolas,monospace;border-top:1px dashed var(--line);
+    display:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .debug.on{display:block}
+
+  /* lesson reader */
+  .reader{position:fixed;inset:0;background:var(--bg);z-index:30;display:none;overflow-y:auto;
+    opacity:0;transition:opacity .15s}
+  .reader.open{display:block}
+  .reader.shown{opacity:1}
+  .reader-inner{max-width:720px;margin:0 auto;padding:32px 24px 64px}
+  .reader-top{display:flex;align-items:center;gap:10px;margin-bottom:26px}
+  .reader-top .back{border:1px solid var(--line);background:var(--paper);font:inherit;font-size:12.5px;
+    color:var(--muted);padding:7px 14px;border-radius:999px;cursor:pointer;transition:all .15s}
+  .reader-top .back:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-soft)}
+  .reader-top .badge{margin-left:auto}
+  .reader h1.les{font-size:34px;line-height:1.15;letter-spacing:-.02em;margin:0 0 8px}
+  .les-meta{color:#98a2b3;font:12px Consolas,monospace;margin-bottom:20px}
+  .les-lead{color:var(--muted);font-size:16px;margin:0 0 8px}
+  .les-sec{margin-top:26px}
+  .les-sec h2{font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);
+    margin:0 0 8px}
+  .les-sec p{margin:0;font-size:15px;line-height:1.7;color:var(--ink)}
+  .les-sec mark{background:#dcf6f0;color:var(--mark);font-weight:600;border-radius:3px;padding:0 2px}
+  .les-footer{margin-top:44px;color:#98a2b3;font-size:12px}
+  .reader .skeleton{color:#98a2b3;font-size:14px;padding:8px 0}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">hi</div><b>hello interview</b><span class="spacer"></span>
+  <span style="color:var(--muted);font-size:12px">local search rebuild · reverse engineered, then rebuilt</span>
+</header>
+
+<main>
+  <h1>Find the lesson you need,<br/><span class="grad">letter by letter.</span></h1>
+  <p class="lead">A command palette over a BM25 index — observed from the real API, rebuilt from scratch.<br/>
+     Typos survive. Prefixes search. One global endpoint, tabs for every content type.</p>
+  <button class="opener" id="opener">
+    <span>Search lessons, questions, features…</span><span class="spacer"></span><kbd>Ctrl</kbd><kbd>K</kbd>
+  </button>
+  <div class="chips" id="chips">
+    <span class="label">try</span>
+    <button class="chip" data-q="rate limiting">rate limiting</button>
+    <button class="chip" data-q="cachin">cachin <em style="opacity:.6">← typo</em></button>
+    <button class="chip" data-q="c">c <em style="opacity:.6">← first letter</em></button>
+    <button class="chip" data-q="netflix interview">netflix interview</button>
+    <button class="chip" data-q="kafke">kafke <em style="opacity:.6">← typo</em></button>
+    <button class="chip" data-q="design a ticket">design a ticket</button>
+  </div>
+  <div class="stats" id="stats">index: loading…</div>
+  <div class="pipeline">query ─► tokenize/stem ─► <b>inverted index</b> ─► <b>BM25</b> (lexical)
+       └─────────► <b>prefix expansion</b> (letter-by-letter)
+       └─────────► <b>fuzzy expansion</b> (typo tolerance)
+   └──► <b>reciprocal-rank fusion</b> ─► phrase & priority boosts ─► hits</div>
+</main>
+
+<div class="backdrop" id="backdrop">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlgtitle">
+    <div class="search-row" id="searchRow">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#98a2b3" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" placeholder="Search..." autocomplete="off" spellcheck="false" aria-label="Search" />
+      <button class="clear-q" id="clearQ" title="clear">✕</button>
+      <kbd>esc</kbd>
+    </div>
+    <div class="recent" id="recent"><span class="rlabel">recent</span></div>
+    <div class="tabs" role="tablist" id="tabs">
+      <button class="tab" role="tab" data-tab="all" aria-selected="true">all</button>
+      <button class="tab" role="tab" data-tab="content" aria-selected="false">content</button>
+      <button class="tab" role="tab" data-tab="community" aria-selected="false">community</button>
+      <button class="tab" role="tab" data-tab="feature" aria-selected="false">features</button>
+    </div>
+    <div class="results" id="results"><div class="empty">Type to search — try “rate limiting”, “caching”, or a typo like “cachin”.</div></div>
+    <div class="debug" id="debug"></div>
+    <div class="footer">
+      <span id="count">0 results</span><span class="spacer"></span>
+      <span>↑↓ navigate · ↵ open</span>
+    </div>
+  </div>
+</div>
+
+<div class="reader" id="reader">
+  <div class="reader-inner">
+    <div class="reader-top">
+      <button class="back" id="backBtn">← back to search <kbd>esc</kbd></button>
+      <span class="badge" id="lesTier"></span>
+    </div>
+    <h1 class="les" id="lesTitle"></h1>
+    <div class="les-meta" id="lesMeta"></div>
+    <p class="les-lead" id="lesLead"></p>
+    <div id="lesBody"></div>
+    <div class="les-footer">reversed from observed API behaviour · generated lesson body · <kbd>esc</kbd> closes</div>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const backdrop = $("#backdrop"), input = $("#q"), results = $("#results"),
+        count = $("#count"), debug = $("#debug"), recentBox = $("#recent"),
+        searchRow = $("#searchRow");
+
+  let last = { hits: [], q: "" }, tab = "all", active = -1, requestSeq = 0;
+  let recent = JSON.parse(localStorage.getItem("hi-recent") || "[]");
+
+  function open() {
+    backdrop.classList.add("open");
+    requestAnimationFrame(() => backdrop.classList.add("shown"));
+    input.focus(); input.select();
+    paintRecent();
+  }
+  function close() {
+    backdrop.classList.remove("shown");
+    setTimeout(() => backdrop.classList.remove("open"), 160);
+  }
+  const isOpen = () => backdrop.classList.contains("open");
+
+  fetch("/stats").then(r => r.json()).then(s => {
+    $("#stats").innerHTML = `index: <code>${s.docs}</code> documents · <code>${s.terms}</code> terms · <code>${s.postings}</code> postings · avg doc length <code>${s.avgDocLength}</code>`;
+  });
+
+  async function run(q) {
+    const seq = ++requestSeq;
+    searchRow.classList.toggle("has-q", Boolean(q.trim()));
+    if (!q.trim()) {
+      last = { hits: [], q: "" };
+      history.replaceState(null, "", location.pathname);
+      render(); return;
+    }
+    history.replaceState(null, "", `?q=${encodeURIComponent(q)}`);
+    try {
+      // global endpoint: one query across every type, with per-tab counts
+      const res = await fetch(`/api/global?q=${encodeURIComponent(q)}&limit=20`);
+      if (seq !== requestSeq) return; // a newer keystroke already superseded this response
+      if (!res.ok) { results.innerHTML = '<div class="empty">Search needs a query.</div>'; return; }
+      last = await res.json();
+      last.q = q;
+      rememberRecent(q);
+      render();
+    } catch { /* aborted or offline: keep showing the previous frame */ }
+  }
+
+  function visible() {
+    return tab === "all" ? last.hits : last.hits.filter(h => h.type === tab);
+  }
+
+  // highlight query terms without trusting innerHTML: build nodes piecewise
+  function highlightInto(el, text) {
+    const terms = (last.terms || []).filter(t => t.length > 1);
+    const lower = text.toLowerCase();
+    const marks = [];
+    for (const t of terms) {
+      let from = 0, at = -1;
+      while ((at = lower.indexOf(t, from)) !== -1) {
+        marks.push([at, at + t.length]);
+        from = at + t.length;
+      }
+    }
+    if (!marks.length) { el.textContent = text; return; }
+    marks.sort((a, b) => a[0] - b[0]);
+    const merged = [];
+    for (const m of marks) {
+      const p = merged[merged.length - 1];
+      if (p && m[0] < p[1]) { p[1] = Math.max(p[1], m[1]); } else merged.push(m);
+    }
+    let cursor = 0;
+    for (const [s, e] of merged) {
+      if (s > cursor) el.append(text.slice(cursor, s));
+      const mark = document.createElement("mark");
+      mark.textContent = text.slice(s, e);
+      el.append(mark);
+      cursor = e;
+    }
+    if (cursor < text.length) el.append(text.slice(cursor));
+  }
+
+  function render() {
+    const rows = visible();
+    active = rows.length ? 0 : -1;
+    results.innerHTML = "";
+    if (!rows.length) {
+      results.innerHTML = `<div class="empty">${last.q ? "No results for “" + escapeHtml(last.q) + "”." : "Type to search."}</div>`;
+    }
+    rows.forEach((h, i) => {
+      const a = document.createElement("a");
+      a.className = "hit";
+      a.href = "#";
+      a.dataset.i = i;
+      a.innerHTML = `
+        <div class="t"><span class="title"></span>
+          ${h.tier === "PREMIUM" ? '<span class="badge premium">premium</span>' : '<span class="badge">free</span>'}
+        </div>
+        <div class="b"></div>
+        <div class="meta"><span class="path"></span><span class="scoreTxt"></span><button class="copy" title="copy demo link">copy link</button></div>`;
+      highlightInto(a.querySelector(".title"), h.title);
+      a.querySelector(".b").textContent = h.blurb;
+      a.querySelector(".path").textContent = h.path;
+      a.querySelector(".scoreTxt").textContent = `· score ${h.score} · fused ${h.signals?.fused ?? "?"}`;
+      a.querySelector(".copy").addEventListener("click", (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const link = `${location.origin}${h.path}`;
+        navigator.clipboard?.writeText(link);
+        e.target.textContent = "copied!";
+        setTimeout(() => { e.target.textContent = "copy link"; }, 1200);
+      });
+      a.addEventListener("click", (e) => { e.preventDefault(); pick(h); });
+      results.append(a);
+    });
+    count.textContent = `${last.found ?? 0} results`;
+    const g = last.groups || {};
+    document.querySelectorAll(".tab").forEach((t) => {
+      const name = t.dataset.tab;
+      const n = name === "all" ? (last.found ?? 0) : (g[name] ?? 0);
+      t.textContent = `${name}${n ? ` (${n})` : ""}`;
+    });
+    debug.textContent = last.q
+      ? `terms: ${(last.terms || []).join(", ")} · expansions: ${(last.expansions || []).map(e => `${e.from}→${e.to} (${e.similarity})`).join(", ") || "none"} · took ${last.tookMs}ms`
+      : "";
+    debug.classList.toggle("on", Boolean(last.q));
+    highlight();
+  }
+
+  function highlight() {
+    [...results.querySelectorAll(".hit")].forEach((el, i) => {
+      el.style.background = i === active ? "#f5f7f9" : "";
+    });
+  }
+
+  function pick(hit) {
+    close();
+    openLesson(hit);
+  }
+
+  // lesson reader: one click from a hit opens the actual piece, not a stub
+  const reader = $("#reader");
+  async function openLesson(hit) {
+    reader.classList.add("open");
+    requestAnimationFrame(() => reader.classList.add("shown"));
+    $("#lesTitle").textContent = hit.title;
+    $("#lesMeta").textContent = `${hit.path} · tags: ${(hit.tags || []).join(" · ")}`;
+    $("#lesTier").textContent = hit.tier;
+    $("#lesTier").className = `badge${hit.tier === "PREMIUM" ? " premium" : ""}`;
+    $("#lesLead").textContent = "";
+    const bodyEl = $("#lesBody");
+    bodyEl.innerHTML = '<p class="skeleton">opening lesson…</p>';
+    try {
+      const res = await fetch(`/api/lesson?id=${encodeURIComponent(hit.id)}`);
+      if (!res.ok) throw new Error("lesson not found");
+      const d = await res.json();
+      $("#lesLead").textContent = d.blurb;
+      bodyEl.innerHTML = "";
+      for (const sec of d.body) {
+        const wrap = document.createElement("section");
+        wrap.className = "les-sec";
+        const h = document.createElement("h2");
+        h.textContent = sec.h;
+        const p = document.createElement("p");
+        highlightInto(p, sec.p, d.tags);
+        wrap.append(h, p);
+        bodyEl.append(wrap);
+      }
+      reader.scrollTo && reader.scrollTo(0, 0);
+    } catch {
+      bodyEl.innerHTML = '<p class="skeleton">this lesson could not be opened.</p>';
+    }
+  }
+  function closeLesson() {
+    reader.classList.remove("shown");
+    setTimeout(() => reader.classList.remove("open"), 160);
+    open(); // return to the palette where the user was
+  }
+  $("#backBtn").addEventListener("click", closeLesson);
+
+  function rememberRecent(q) {
+    recent = [q, ...recent.filter(r => r !== q)].slice(0, 6);
+    localStorage.setItem("hi-recent", JSON.stringify(recent));
+  }
+  function paintRecent() {
+    recentBox.innerHTML = "";
+    if (!recent.length || input.value) { recentBox.classList.remove("on"); return; }
+    recentBox.classList.add("on");
+    recentBox.append(Object.assign(document.createElement("span"), { className: "rlabel", textContent: "recent" }));
+    recent.forEach((r) => {
+      const b = document.createElement("button");
+      b.className = "rchip"; b.append(r);
+      b.addEventListener("click", () => { input.value = r; run(r); });
+      recentBox.append(b);
+    });
+  }
+
+  function escapeHtml(s) {
+    const d = document.createElement("div"); d.textContent = s; return d.innerHTML;
+  }
+
+  $("#opener").addEventListener("click", open);
+  backdrop.addEventListener("mousedown", (e) => { if (e.target === backdrop) close(); });
+
+  $("#chips").addEventListener("click", (e) => {
+    const c = e.target.closest(".chip"); if (!c) return;
+    open();
+    input.value = c.dataset.q;
+    run(c.dataset.q);
+  });
+  $("#clearQ").addEventListener("click", () => { input.value = ""; input.focus(); run(""); });
+
+  $("#tabs").addEventListener("click", (e) => {
+    const btn = e.target.closest(".tab"); if (!btn) return;
+    tab = btn.dataset.tab;
+    [...document.querySelectorAll(".tab")].forEach((t) =>
+      t.setAttribute("aria-selected", String(t === btn)));
+    render();
+  });
+
+  let timer;
+  input.addEventListener("input", () => {
+    // letter by letter: fire on every keystroke with a tiny debounce;
+    // an empty box falls back to recent searches
+    paintRecent();
+    clearTimeout(timer);
+    const q = input.value;
+    timer = setTimeout(() => run(q), 40);
+  });
+
+  input.addEventListener("keydown", (e) => {
+    const rows = visible();
+    if (e.key === "ArrowDown") { e.preventDefault(); active = Math.min(rows.length - 1, active + 1); highlight(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); active = Math.max(0, active - 1); highlight(); }
+    else if (e.key === "Enter" && rows[active]) { e.preventDefault(); pick(rows[active]); }
+  });
+
+  window.addEventListener("keydown", (e) => {
+    const readerOpen = reader.classList.contains("open");
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      if (readerOpen) return; // ctrl+k in a lesson does nothing from here; esc goes back
+      isOpen() ? close() : open();
+    }
+    if (e.key === "Escape") {
+      if (readerOpen) { e.preventDefault(); closeLesson(); }
+      else if (isOpen()) { e.preventDefault(); close(); }
+    }
+  });
+
+  // deep link: /?q=cachin opens the palette mid-typing
+  const initial = new URLSearchParams(location.search).get("q");
+  if (initial) { open(); input.value = initial; run(initial); }
+
+  render();
+})();
+</script>
+</body>
+</html>
