@@ -3,6 +3,12 @@
 I observed a real product's search API with [REA](https://github.com/morluto/rea) (Reverse Engineer Anything),
 then rebuilt it from scratch with an AI agent — one Node file, zero dependencies.
 
+## Demo
+
+🚀 **Live: https://search-engine-rebuild.onrender.com**
+
+(Takes ~30 s to wake on the free tier.)
+
 ```powershell
 node server.mjs          # http://127.0.0.1:8130  (press Ctrl+K in the page)
 node test/api.test.mjs   # 17/17 tests
