@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="0.55" stop-color="#0d1526"/>
+      <stop offset="1" stop-color="#10231f"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.75" cy="0.08" r="0.55">
+      <stop offset="0" stop-color="#14b8a6" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#14b8a6" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="54" height="54" patternUnits="userSpaceOnUse">
+      <path d="M54 0H0V54" fill="none" stroke="#1e293b" stroke-width="1" opacity="0.35"/>
+    </pattern>
+  </defs>
+
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+  <rect width="1080" height="1080" fill="url(#grid)"/>
+  <rect width="1080" height="1080" fill="url(#glow)"/>
+
+  <!-- top row -->
+  <rect x="70" y="78" width="410" height="46" rx="23" fill="none" stroke="#2dd4bf" stroke-width="1.5" opacity="0.75"/>
+  <circle cx="98" cy="101" r="6" fill="#2dd4bf"/>
+  <text x="118" y="108" font-family="Segoe UI, Arial" font-size="21" font-weight="600" letter-spacing="2.5" fill="#5eead4">REA × VIBE CODING</text>
+  <text x="1010" y="108" text-anchor="end" font-family="Consolas, monospace" font-size="21" fill="#94a3b8">0 dependencies</text>
+
+  <!-- headline -->
+  <text x="70" y="222" font-family="Segoe UI, Arial" font-size="56" font-weight="700" fill="#f1f5f9">I reverse-engineered</text>
+  <text x="70" y="288" font-family="Segoe UI, Arial" font-size="56" font-weight="700" fill="#f1f5f9">a real <tspan fill="#2dd4bf">search API</tspan> — then</text>
+  <text x="70" y="354" font-family="Segoe UI, Arial" font-size="56" font-weight="700" fill="#f1f5f9">rebuilt it from scratch.</text>
+
+  <!-- command palette mock -->
+  <rect x="70" y="410" width="940" height="366" rx="18" fill="#0f172a" stroke="#263449" stroke-width="1.5"/>
+  <!-- search row -->
+  <rect x="71" y="411" width="938" height="63" rx="17" fill="#111c33"/>
+  <circle cx="112" cy="442" r="13" fill="none" stroke="#94a3b8" stroke-width="2.5"/>
+  <line x1="122" y1="452" x2="134" y2="464" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="156" y="451" font-family="Segoe UI, Arial" font-size="24" fill="#f1f5f9">kafke</text>
+  <rect x="228" y="434" width="4" height="26" fill="#2dd4bf"/>
+  <rect x="926" y="430" width="60" height="27" rx="6" fill="#1b2941" stroke="#334155" stroke-width="1"/>
+  <text x="956" y="449" text-anchor="middle" font-family="Consolas, monospace" font-size="16" fill="#94a3b8">ctrl k</text>
+  <rect x="70" y="474" width="940" height="1" fill="#263449"/>
+
+  <!-- selected hit -->
+  <rect x="71" y="475" width="938" height="76" fill="#13242f"/>
+  <rect x="71" y="475" width="938" height="76" fill="none" stroke="#2dd4bf" stroke-width="1" opacity="0.35"/>
+  <text x="100" y="507" font-family="Segoe UI, Arial" font-size="22" font-weight="600" fill="#f8fafc">Ka<tspan fill="#5eead4">f</tspan><tspan fill="#5eead4">k</tspan>a for System Design Interviews</text>
+  <rect x="100" y="519" width="58" height="24" rx="12" fill="#0f2e33"/>
+  <text x="129" y="536" text-anchor="middle" font-family="Segoe UI, Arial" font-size="14" font-weight="700" fill="#5eead4">FREE</text>
+  <text x="168" y="536" font-family="Consolas, monospace" font-size="15" fill="#64748b">/learn/system-design/key-technologies/kafka</text>
+  <text x="972" y="521" text-anchor="end" font-family="Consolas, monospace" font-size="15" fill="#2dd4bf">score 0.61</text>
+
+  <!-- fuzzy hit -->
+  <text x="100" y="595" font-family="Segoe UI, Arial" font-size="22" fill="#cbd5e1">Design a Notification System</text>
+  <text x="100" y="631" font-family="Consolas, monospace" font-size="15" fill="#64748b">fuzzy expansion: kafke → kafka (0.86) · took 1.2 ms</text>
+  <text x="972" y="595" text-anchor="end" font-family="Consolas, monospace" font-size="15" fill="#475569">score 0.07</text>
+
+  <rect x="70" y="660" width="940" height="1" fill="#263449"/>
+  <!-- tabs -->
+  <g font-family="Segoe UI, Arial" font-size="17">
+    <rect x="90" y="686" width="108" height="34" rx="8" fill="#0f2e33"/>
+    <text x="144" y="709" text-anchor="middle" font-weight="700" fill="#5eead4">all (3)</text>
+    <text x="252" y="709" fill="#94a3b8">content (2)</text>
+    <text x="398" y="709" fill="#94a3b8">community (1)</text>
+    <text x="572" y="709" fill="#94a3b8">features (0)</text>
+  </g>
+  <text x="972" y="709" text-anchor="end" font-family="Consolas, monospace" font-size="15" fill="#475569">↑↓ · ↵ · esc</text>
+
+  <!-- pipeline -->
+  <g font-family="Consolas, monospace" font-size="20">
+    <text x="70" y="846" fill="#94a3b8">query → tokenize → index </text>
+    <text x="368" y="846" fill="#5eead4">→ BM25</text>
+    <text x="472" y="846" fill="#94a3b8"> → fuzzy + prefix </text>
+    <text x="688" y="846" fill="#5eead4">→ fusion → hits</text>
+  </g>
+
+  <!-- stats pills -->
+  <g font-family="Segoe UI, Arial" font-size="20" font-weight="600">
+    <rect x="70"  y="890" width="122" height="44" rx="22" fill="#132420" stroke="#2dd4bf" stroke-opacity="0.5" stroke-width="1"/>
+    <text x="131" y="919" text-anchor="middle" fill="#5eead4">17/17 tests</text>
+    <rect x="206" y="890" width="150" height="44" rx="22" fill="#132420" stroke="#fbbf24" stroke-opacity="0.5" stroke-width="1"/>
+    <text x="281" y="919" text-anchor="middle" fill="#fcd34d">typo-proof</text>
+    <rect x="370" y="890" width="100" height="44" rx="22" fill="#132420" stroke="#2dd4bf" stroke-opacity="0.5" stroke-width="1"/>
+    <text x="420" y="919" text-anchor="middle" fill="#5eead4">44 docs</text>
+    <rect x="484" y="890" width="170" height="44" rx="22" fill="#132420" stroke="#2dd4bf" stroke-opacity="0.5" stroke-width="1"/>
+    <text x="569" y="919" text-anchor="middle" fill="#5eead4">letter-by-letter</text>
+    <rect x="668" y="890" width="160" height="44" rx="22" fill="#132420" stroke="#94a3b8" stroke-opacity="0.4" stroke-width="1"/>
+    <text x="748" y="919" text-anchor="middle" fill="#94a3b8">BM25 + RRF</text>
+    <rect x="842" y="890" width="168" height="44" rx="22" fill="#132420" stroke="#94a3b8" stroke-opacity="0.4" stroke-width="1"/>
+    <text x="926" y="919" text-anchor="middle" fill="#94a3b8">node only</text>
+  </g>
+
+  <!-- footer -->
+  <rect x="70" y="960" width="940" height="56" rx="14" fill="#0f2420" stroke="#1f3d34" stroke-width="1"/>
+  <circle cx="104" cy="988" r="9" fill="none" stroke="#2dd4bf" stroke-width="2"/>
+  <text x="130" y="997" font-family="Segoe UI, Arial" font-size="24" font-weight="600" fill="#e2e8f0">github.com/iyedferjeoui/search-engine-rebuild</text>
+  <text x="990" y="997" text-anchor="end" font-family="Segoe UI, Arial" font-size="22" font-weight="600" fill="#5eead4">live ⚡</text>
+</svg>
