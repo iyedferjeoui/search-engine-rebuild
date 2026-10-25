@@ -1,6 +1,7 @@
 FROM node:26-alpine
 WORKDIR /app
-COPY server.mjs test/ ./test/
+COPY server.mjs .
+COPY test/ ./test/
 COPY public/ ./public/
 COPY data/ ./data/
 ENV NODE_ENV=production

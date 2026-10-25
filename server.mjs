@@ -398,7 +398,9 @@ export function createServer() {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const port = Number(process.env.PORT || 8130);
-  createServer().listen(port, "127.0.0.1", () => {
+  // bind the container to every interface so Render/Fly can route to it
+  const host = process.env.HOST || "0.0.0.0";
+  createServer().listen(port, host, () => {
     console.log(`search demo on http://127.0.0.1:${port}`);
   });
 }
